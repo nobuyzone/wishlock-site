@@ -20,7 +20,7 @@
 <div class="wrap">
   <header class="nav">
     <a class="brand" href="/"><img src="apple-touch-icon.png" alt="">Wishlock</a>
-    <nav class="nav-links" aria-label="Main"><a href="#how">How it works</a><a href="#more">Features</a><a href="#story">Our story</a><a href="#beta">Join the beta</a></nav>
+    <nav class="nav-links" aria-label="Main"><a href="#how">How it works</a><a href="#more">Features</a><a href="#story">Our story</a><a href="#beta">Get early access</a></nav>
   </header>
 
   <section class="hero">
@@ -28,7 +28,7 @@
       <span class="eyebrow">COMING SOON TO IPHONE</span>
       <h1>Wish it. Lock it.<br><span>Let them gift it.</span></h1>
       <p>Make a wishlist, share it with your people, and let them claim gifts in secret. You never see a thing, so the surprise stays a surprise.</p>
-      <div class="cta-row"><a class="btn btn-sun" href="#beta">Join the beta</a><a class="btn btn-ghost" href="#story">Hear the story</a></div>
+      <div class="cta-row"><a class="btn btn-sun" href="#beta">Get early access</a><a class="btn btn-ghost" href="#story">Hear the story</a></div>
     </div>
     <div class="hero-art" aria-hidden="true">
       <svg class="wl-lock" viewBox="38 308 2084 2084" overflow="visible"><g class="wl-shift"><g class="wl-shackle"><use href="#wl-s" width="2160" height="2700"/></g><g class="wl-body"><use href="#wl-b" width="2160" height="2700"/></g></g></svg>
@@ -85,9 +85,16 @@
   </section>
 
   <section class="signup" id="beta">
-    <h2>Be one of the first</h2>
-    <p>Wishlock is in beta on iPhone. Want an invite for you and your family? Send us a note and we'll add you.</p>
-    <a class="btn btn-sun" href="mailto:hello@wishlockapp.com?subject=Wishlock%20beta%20invite">Ask for a beta invite</a>
+    <h2>Get early access</h2>
+    <p>Wishlock is in a small, invite-only beta on iPhone. Join the list and we’ll let you know as soon as there’s a spot for you, and when Wishlock launches.</p>
+    <form id="waitlist" class="wait-form" novalidate>
+      <label class="sr" for="wl-name">First name (optional)</label><input id="wl-name" name="name" maxlength="60" placeholder="First name (optional)" autocomplete="given-name">
+      <label class="sr" for="wl-email">Email</label><input id="wl-email" name="email" type="email" maxlength="200" placeholder="you@example.com" autocomplete="email" required>
+      <input type="text" name="company" tabindex="-1" autocomplete="off" class="hp" aria-hidden="true">
+      <button class="btn btn-sun" type="submit">Join the waitlist</button>
+    </form>
+    <p id="wl-msg" class="wait-msg" role="status" aria-live="polite"></p>
+    <p style="font-size:14px;margin-top:12px">Got an invite from someone? Open the link they sent you. Questions? <a href="mailto:hello@wishlockapp.com" style="color:inherit">hello@wishlockapp.com</a></p>
   </section>
 
   <footer>
@@ -95,5 +102,27 @@
     <nav aria-label="Legal"><a href="privacy.html">Privacy Policy</a><a href="terms.html">Terms of Use</a><a href="mailto:hello@wishlockapp.com">hello@wishlockapp.com</a></nav>
   </footer>
 </div>
+<script>
+(function(){
+  var WL = {url:'https://ytkexbdhjjsswcfewsys.supabase.co', key:'sb_publishable_NE3f0KTD_1TSnA7ivDHoBw_5mYDE88k'};
+  if (window.WL_SITE_TEST) WL = window.WL_SITE_TEST;
+  var f = document.getElementById('waitlist'), msg = document.getElementById('wl-msg');
+  if (!f) return;
+  f.addEventListener('submit', function(e){
+    e.preventDefault();
+    var email = f.email.value.trim(), name = f.name.value.trim(), btn = f.querySelector('button');
+    if (f.company.value) return;
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ msg.textContent = 'Please enter a valid email address.'; f.email.focus(); return; }
+    btn.disabled = true; msg.textContent = 'Adding you…';
+    fetch(WL.url + '/rest/v1/waitlist', {method:'POST', headers:{'apikey':WL.key, 'Content-Type':'application/json', 'Prefer':'return=minimal'},
+      body:JSON.stringify({email:email, name:name || null, source:'website'})})
+      .then(function(r){
+        if (r.ok || r.status === 409){ f.hidden = true; msg.textContent = 'You’re on the list' + (name ? ', ' + name : '') + '! We’ll email you when there’s a spot.'; return; }
+        throw new Error(r.status);
+      })
+      .catch(function(){ btn.disabled = false; msg.textContent = 'Something went wrong. Please try again, or email hello@wishlockapp.com.'; });
+  });
+})();
+</script>
 </body>
 </html>
